@@ -6,11 +6,18 @@ This work is licensed under a Creative Commons Attribution 4.0 International Lic
 pragma solidity 0.8.19;
 
 contract Aluguel {
+    
+    struct DadosPagamento {
+        uint quandoFoiPago;
+        uint valorPago;
+    }
+    
     string public locatario;
     string public locador;
     uint256 private valor;
     uint256 constant public numeroMaximoLegalDeAlugueisParaMulta = 3;
-    bool[] public statusPagamento;
+    DadosPagamento[] public statusPagamento;
+
     /*
     0 - 01/2020 = true
     1 - 02/2020 = true
@@ -35,16 +42,15 @@ contract Aluguel {
         return valor;
     }
  
-    function simulaMulta( uint256 mesesRestantes, uint256 totalMesesContrato) public view returns(uint256 valorMulta) 
-    {
+    function simulaMulta( uint256 mesesRestantes, uint256 totalMesesContrato) public view returns(uint256 valorMulta) {
         valorMulta = valor*numeroMaximoLegalDeAlugueisParaMulta;
         valorMulta = valorMulta/totalMesesContrato;
         valorMulta = valorMulta*mesesRestantes;
         return valorMulta;
     } 
         
-    function reajustaAluguel(uint256 percentualReajuste) public 
-    {
+    function reajustaAluguel(uint256 percentualReajuste) public {
+        require(msg.sender == owner, "somente o dono do imovel pode reajustar o aluguel");
         if (percentualReajuste > 20) {
             percentualReajuste = 20;
         }
@@ -53,11 +59,11 @@ contract Aluguel {
         valor = valor + valorDoAcrescimo;
     }
     
-    function aditamentoValorAluguel(uint256 valorCerto) public   {
+    function aditamentoValorAluguel(uint256 valorCerto) public {
         valor = valorCerto;
     }
 
-    function aplicaMulta(uint256 mesesRestantes, uint256 percentual) public     {
+    function aplicaMulta(uint256 mesesRestantes, uint256 percentual) public {
         require(mesesRestantes<30, "Periodo de contrato invalido");
         for (uint numeroDeVoltas=0; numeroDeVoltas < mesesRestantes; numeroDeVoltas=numeroDeVoltas+2) {
             valor = valor+((valor*percentual)/100);
@@ -65,10 +71,11 @@ contract Aluguel {
     }
     
     
-    function receberPagamento() public payable {
+    function receberPagamento() public payable {        
         require(msg.value>=valor, "Valor insuficiente");
         contaLocador.transfer(msg.value);
-        statusPagamento.push(true);
+        DadosPagamento memory dPgto = DadosPagamento(block.timestamp, msg.value);
+        statusPagamento.push(dPgto);
     }
     
     //msg.value = valor em wei enviado ao contrato
@@ -83,5 +90,13 @@ contract Aluguel {
     
     function quantosPagamentosJaForamFeitos() public view returns (uint256) {
         return statusPagamento.length;
+    }
+
+    function historicoDePagto() public view returns (uint valorTotalRecebido, uint numAluguelRecebido) {
+        for (uint256 i; i < statusPagamento.length; i++) {
+            valorTotalRecebido += statusPagamento[i].valorPago;
+            numAluguelRecebido++;
+        }
+        return (valorTotalRecebido, numAluguelRecebido);
     }
 }
