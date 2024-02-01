@@ -4,7 +4,7 @@ SPDX-License-Identifier: CC-BY-4.0
 This work is licensed under a Creative Commons Attribution 4.0 International License.
 */
 
-// Endereço do contrato na rede Sepolia 0x69951e286F354559E197F8abb3510a9e50ac85Ac
+// Endereço do contrato na rede Sepolia 0x5255A672a1969Db7c3fc78EDecA56D3EaabD0F7d
 
 pragma solidity 0.8.19;
 
