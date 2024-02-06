@@ -3,11 +3,10 @@ SPDX-License-Identifier: CC-BY-4.0
 (c) Developed by Marcello Acar
 This work is licensed under a Creative Commons Attribution 4.0 International License.
 */
-
-// Endereço do contrato na rede Sepolia 0x5255A672a1969Db7c3fc78EDecA56D3EaabD0F7d
-
 pragma solidity 0.8.19;
 
+/// @author Marcello Acar
+/// @title Um exemplo de contrato de Aluguel
 contract Aluguel {
     
     struct DadosPagamento {
@@ -20,6 +19,7 @@ contract Aluguel {
     uint256 private valor;
     uint256 constant public numeroMaximoLegalDeAlugueisParaMulta = 3;
     DadosPagamento[] public statusPagamento;
+
 
     /*
     0 - 01/2020 = true
@@ -41,17 +41,24 @@ contract Aluguel {
         owner = msg.sender;
     }
  
+    // @notice Obtem o valor atual do aluguel
+    // @dev retorna em wei o conteúdo da variavel de contrato valor.
+    // @return valor atual do aluguel
     function valorAtualDoAluguel() public view returns (uint256) {
         return valor;
     }
  
-    function simulaMulta( uint256 mesesRestantes, uint256 totalMesesContrato) public view returns(uint256 valorMulta) {
+    function simulaMulta( uint256 mesesRestantes, uint256 totalMesesContrato) public view returns(uint256 valorMulta) 
+    {
         valorMulta = valor*numeroMaximoLegalDeAlugueisParaMulta;
         valorMulta = valorMulta/totalMesesContrato;
         valorMulta = valorMulta*mesesRestantes;
         return valorMulta;
     } 
-        
+    
+    /// @notice Reajusta o aluguel aplicando um percentual
+    /// @dev Acrescenta no campo do contrato valor um adicional baseado no percentual.
+    /// @param percentualReajuste valor inteiro que representara o percentual de reajuste
     function reajustaAluguel(uint256 percentualReajuste) public {
         require(msg.sender == owner, "somente o dono do imovel pode reajustar o aluguel");
         if (percentualReajuste > 20) {
@@ -62,11 +69,11 @@ contract Aluguel {
         valor = valor + valorDoAcrescimo;
     }
     
-    function aditamentoValorAluguel(uint256 valorCerto) public {
+    function aditamentoValorAluguel(uint256 valorCerto) public   {
         valor = valorCerto;
     }
 
-    function aplicaMulta(uint256 mesesRestantes, uint256 percentual) public {
+    function aplicaMulta(uint256 mesesRestantes, uint256 percentual) public     {
         require(mesesRestantes<30, "Periodo de contrato invalido");
         for (uint numeroDeVoltas=0; numeroDeVoltas < mesesRestantes; numeroDeVoltas=numeroDeVoltas+2) {
             valor = valor+((valor*percentual)/100);
