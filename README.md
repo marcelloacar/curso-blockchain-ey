@@ -1,3 +1,3 @@
 # curso-blockchain-ey
 
-### Solitidy
+### Solidity
